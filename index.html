@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Tag Tracker</title>
+  <meta name="theme-color" content="#10b981">
+  <link rel="manifest" id="manifest-placeholder">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
+
+  <!-- Header -->
+  <header class="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <span>🏷️</span> Green Tag Tracker
+      </h1>
+      <span id="vault-status" class="text-xs bg-emerald-800 px-2.5 py-1 rounded-full font-medium">
+        🔒 映射表已锁定
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-3xl mx-auto p-4 space-y-6">
+
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-slate-300 gap-2 text-sm font-medium">
+      <button id="tab-check" onclick="switchTab('check')" class="py-2 px-4 border-b-2 border-emerald-600 text-emerald-600 font-bold">
+        🔍 工单查询
+      </button>
+      <button id="tab-entry" onclick="switchTab('entry')" class="py-2 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+        ➕ 录入 Green Tag
+      </button>
+      <button id="tab-vault" onclick="switchTab('vault')" class="py-2 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+        🔐 映射表 (加密)
+      </button>
+      <button id="tab-records" onclick="switchTab('records')" class="py-2 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+        📋 所有记录
+      </button>
+    </div>
+
+    <!-- TAB 1: Check WO Status -->
+    <section id="sec-check" class="space-y-4">
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+        <label class="block text-sm font-semibold mb-2">输入 Work Order 查询状态：</label>
+        <div class="flex gap-2">
+          <input type="text" id="search-wo" placeholder="例如: WO-102938" class="flex-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+          <button onclick="checkWOStatus()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition">
+            查询
+          </button>
+        </div>
+      </div>
+
+      <!-- Result Display Card -->
+      <div id="check-result" class="hidden"></div>
+    </section>
+
+    <!-- TAB 2: Green Tag Entry -->
+    <section id="sec-entry" class="hidden bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+      <h2 class="text-lg font-bold border-b pb-2">新增 Green Tag 记录</h2>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1">Work Order (工单号) *</label>
+        <input type="text" id="input-wo" placeholder="例如: WO-102938" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Part Number (P/N) *</label>
+        <input type="text" id="input-pn" placeholder="例如: PN-99482" oninput="onPNInput()" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">产品描述 (根据 P/N 自动填充)</label>
+        <textarea id="input-desc" rows="2" placeholder="自动填充或手动输入描述..." class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Green Tag Attached 日期 *</label>
+        <input type="date" id="input-date" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
+
+      <button onclick="saveGreenTag()" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition shadow">
+        确认提交 (Mark Done)
+      </button>
+    </section>
+
+    <!-- TAB 3: Encrypted Mapping Vault -->
+    <section id="sec-vault" class="hidden space-y-4">
+      <!-- Unlock / Set Passphrase Card -->
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <h2 class="text-lg font-bold border-b pb-2">P/N 与产品描述映射表 (AES 加密)</h2>
+        <p class="text-xs text-slate-500">
+          这里的对照数据会加密存储在本地。部署在 GitHub 时无密匙任何人都无法查看。
+        </p>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">主解密密码 (Passphrase)</label>
+          <input type="password" id="vault-passphrase" placeholder="输入访问/加密密码" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="unlockVault()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 transition">
+            🔓 解密映射表
+          </button>
+          <button onclick="saveAndEncryptVault()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition">
+            🔒 保存并加密
+          </button>
+        </div>
+      </div>
+
+      <!-- Mapping Table Data Editor -->
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+        <label class="block text-sm font-medium">对照表内容 (格式: P/N, 产品描述)</label>
+        <p class="text-xs text-slate-400">每行一条记录，格式如：<code>PN-1001, 12V 驱动电机组件</code></p>
+        <textarea id="vault-raw-text" rows="8" placeholder="PN-1001, 描述A&#10;PN-1002, 描述B" class="w-full p-2.5 border rounded-lg font-mono text-sm bg-slate-50 focus:bg-white outline-none"></textarea>
+      </div>
+    </section>
+
+    <!-- TAB 4: All Records -->
+    <section id="sec-records" class="hidden space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">所有 Green Tag 记录</h2>
+        <div class="flex gap-2">
+          <button onclick="exportData()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded font-medium">导出 CSV</button>
+          <button onclick="clearAllData()" class="text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 px-3 py-1.5 rounded font-medium">清空记录</button>
+        </div>
+      </div>
+      <div id="records-list" class="space-y-3"></div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- State & App Storage ---
+    let greenTags = JSON.parse(localStorage.getItem('gt_records') || '{}');
+    let encryptedVault = localStorage.getItem('gt_vault_enc') || null;
+    let decryptedPnMap = {}; 
+
+    document.getElementById('input-date').valueAsDate = new Date();
+
+    // --- Tab Switcher ---
+    function switchTab(tab) {
+      ['check', 'entry', 'vault', 'records'].forEach(t => {
+        document.getElementById(`sec-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${t}`);
+        btn.classList.remove('border-emerald-600', 'text-emerald-600', 'font-bold');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
+      document.getElementById(`sec-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      activeBtn.classList.add('border-emerald-600', 'text-emerald-600', 'font-bold');
+      activeBtn.classList.remove('border-transparent', 'text-slate-500');
+
+      if (tab === 'records') renderRecords();
+    }
+
+    // --- Search / Check WO Status ---
+    function checkWOStatus() {
+      const wo = document.getElementById('search-wo').value.trim();
+      const resContainer = document.getElementById('check-result');
+      resContainer.classList.remove('hidden');
+
+      if (!wo) {
+        resContainer.innerHTML = `<div class="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200">请输入有效的 Work Order 号码。</div>`;
+        return;
+      }
+
+      const item = greenTags[wo];
+      if (item) {
+        resContainer.innerHTML = `
+          <div class="p-5 bg-emerald-50 border-2 border-emerald-500 rounded-xl space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="px-3 py-1 bg-emerald-600 text-white font-bold text-xs rounded-full">DONE (已做 Green Tag)</span>
+              <span class="text-xs text-slate-500">日期: ${item.date}</span>
+            </div>
+            <h3 class="text-xl font-extrabold text-emerald-900">${item.wo}</h3>
+            <p class="text-sm"><strong>Part Number:</strong> <span class="font-mono">${item.pn}</span></p>
+            <p class="text-sm"><strong>产品描述:</strong> ${item.desc || '（无描述）'}</p>
+          </div>
+        `;
+      } else {
+        resContainer.innerHTML = `
+          <div class="p-5 bg-rose-50 border-2 border-rose-400 rounded-xl space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="px-3 py-1 bg-rose-600 text-white font-bold text-xs rounded-full">NOT DONE (未做/未登记)</span>
+            </div>
+            <h3 class="text-lg font-bold text-rose-900">未找到工单号：${wo}</h3>
+            <p class="text-xs text-rose-700">说明该工单尚未附上 Green Tag 或未录入系统。</p>
+          </div>
+        `;
+      }
+    }
+
+    // --- Auto Fill Description on P/N Input ---
+    function onPNInput() {
+      const pn = document.getElementById('input-pn').value.trim();
+      const descInput = document.getElementById('input-desc');
+      if (decryptedPnMap[pn]) {
+        descInput.value = decryptedPnMap[pn];
+      }
+    }
+
+    // --- Save Green Tag ---
+    function saveGreenTag() {
+      const wo = document.getElementById('input-wo').value.trim();
+      const pn = document.getElementById('input-pn').value.trim();
+      const desc = document.getElementById('input-desc').value.trim();
+      const date = document.getElementById('input-date').value;
+
+      if (!wo || !pn || !date) {
+        alert('请填写 Work Order、Part Number 以及 Attached 日期！');
+        return;
+      }
+
+      greenTags[wo] = { wo, pn, desc, date, updatedAt: new Date().toISOString() };
+      localStorage.setItem('gt_records', JSON.stringify(greenTags));
+
+      alert(`工单 ${wo} 已成功提交 (Marked Done)!`);
+      document.getElementById('input-wo').value = '';
+      document.getElementById('input-pn').value = '';
+      document.getElementById('input-desc').value = '';
+      switchTab('check');
+      document.getElementById('search-wo').value = wo;
+      checkWOStatus();
+    }
+
+    // --- Web Crypto API: PBKDF2 & AES-GCM ---
+    async function getKey(passphrase, salt) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+      );
+    }
+
+    async function saveAndEncryptVault() {
+      const pass = document.getElementById('vault-passphrase').value;
+      const rawText = document.getElementById('vault-raw-text').value.trim();
+
+      if (!pass) {
+        alert('请输入加解密密码！');
+        return;
+      }
+
+      try {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await getKey(pass, salt);
+
+        const enc = new TextEncoder();
+        const encryptedContent = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv }, key, enc.encode(rawText)
+        );
+
+        const payload = {
+          salt: Array.from(salt),
+          iv: Array.from(iv),
+          data: Array.from(new Uint8Array(encryptedContent))
+        };
+
+        localStorage.setItem('gt_vault_enc', JSON.stringify(payload));
+        parseVaultText(rawText);
+
+        document.getElementById('vault-status').innerText = '🔓 映射表已解密';
+        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
+        alert('映射表已加密保存！');
+      } catch (err) {
+        alert('加密失败：' + err.message);
+      }
+    }
+
+    async function unlockVault() {
+      const pass = document.getElementById('vault-passphrase').value;
+      const payloadRaw = localStorage.getItem('gt_vault_enc');
+
+      if (!pass) {
+        alert('请输入解密密码！');
+        return;
+      }
+      if (!payloadRaw) {
+        alert('尚未保存任何加密映射表！');
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(payloadRaw);
+        const salt = new Uint8Array(payload.salt);
+        const iv = new Uint8Array(payload.iv);
+        const data = new Uint8Array(payload.data);
+
+        const key = await getKey(pass, salt);
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv }, key, data
+        );
+
+        const dec = new TextDecoder();
+        const text = dec.decode(decrypted);
+
+        document.getElementById('vault-raw-text').value = text;
+        parseVaultText(text);
+
+        document.getElementById('vault-status').innerText = '🔓 映射表已解密';
+        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
+        alert('映射表解密成功！');
+      } catch (err) {
+        alert('解密失败：密码错误或数据损坏！');
+      }
+    }
+
+    function parseVaultText(text) {
+      decryptedPnMap = {};
+      const lines = text.split('\n');
+      lines.forEach(line => {
+        const parts = line.split(',');
+        if (parts.length >= 2) {
+          const pn = parts[0].trim();
+          const desc = parts.slice(1).join(',').trim();
+          if (pn) decryptedPnMap[pn] = desc;
+        }
+      });
+    }
+
+    // --- Render All Records ---
+    function renderRecords() {
+      const container = document.getElementById('records-list');
+      const keys = Object.keys(greenTags);
+
+      if (keys.length === 0) {
+        container.innerHTML = `<p class="text-sm text-slate-400 text-center py-6">暂无 Green Tag 记录</p>`;
+        return;
+      }
+
+      container.innerHTML = keys.map(k => {
+        const item = greenTags[k];
+        return `
+          <div class="p-4 bg-white border rounded-lg shadow-sm flex justify-between items-center">
+            <div>
+              <div class="font-bold text-slate-800">${item.wo} <span class="text-xs font-normal text-slate-500">(${item.pn})</span></div>
+              <div class="text-xs text-slate-500 mt-0.5">${item.desc || '无描述'}</div>
+              <div class="text-xs text-emerald-600 mt-1">Attached 日期: ${item.date}</div>
+            </div>
+            <button onclick="deleteRecord('${item.wo}')" class="text-xs text-rose-500 hover:text-rose-700 px-2 py-1">删除</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteRecord(wo) {
+      if (confirm(`确定要删除工单 ${wo} 的记录吗？`)) {
+        delete greenTags[wo];
+        localStorage.setItem('gt_records', JSON.stringify(greenTags));
+        renderRecords();
+      }
+    }
+
+    function clearAllData() {
+      if (confirm('警告：确定要清空所有已保存的 Green Tag 记录吗？')) {
+        greenTags = {};
+        localStorage.setItem('gt_records', JSON.stringify(greenTags));
+        renderRecords();
+      }
+    }
+
+    function exportData() {
+      const keys = Object.keys(greenTags);
+      if (keys.length === 0) return alert('无数据可导出！');
+
+      let csv = 'Work Order,Part Number,Description,Attached Date\n';
+      keys.forEach(k => {
+        const item = greenTags[k];
+        csv += `"${item.wo}","${item.pn}","${item.desc.replace(/"/g, '""')}","${item.date}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Green_Tag_Records_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    // --- Dynamic Manifest Generation for PWA ---
+    const manifest = {
+      name: "Green Tag Tracker",
+      short_name: "GreenTag",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#f8fafc",
+      theme_color: "#10b981",
+      icons: [{
+        src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏷️</text></svg>",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml"
+      }]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+  </script>
+</body>
+</html>
