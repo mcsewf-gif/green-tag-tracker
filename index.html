@@ -9,7 +9,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    /* 隐藏 Tab 滚动条但保留滚动功能 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -17,33 +16,33 @@
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
   <!-- Header -->
-  <header class="bg-emerald-600 text-white p-3 sm:p-4 shadow-md sticky top-0 z-50">
+  <header class="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50">
     <div class="max-w-3xl mx-auto flex justify-between items-center">
-      <h1 class="text-lg sm:text-xl font-bold flex items-center gap-2">
+      <h1 class="text-xl font-bold flex items-center gap-2">
         <span>🏷️</span> Green Tag Tracker
       </h1>
-      <span id="vault-status" class="text-[11px] sm:text-xs bg-emerald-800 px-2 py-1 rounded-full font-medium whitespace-nowrap">
+      <span id="vault-status" class="text-xs bg-emerald-800 px-2.5 py-1 rounded-full font-medium">
         🔒 映射表已锁定
       </span>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-3xl mx-auto p-3 sm:p-4 space-y-5">
+  <main class="max-w-3xl mx-auto p-4 space-y-6">
 
-    <!-- Navigation Tabs (横向单行排列，支持超小屏横向滑动) -->
-    <div class="flex border-b border-slate-200 overflow-x-auto no-scrollbar gap-1 text-xs font-medium">
-      <button id="tab-check" onclick="switchTab('check')" class="py-2.5 px-3 border-b-2 border-emerald-600 text-emerald-600 font-bold whitespace-nowrap flex items-center gap-1.5 shrink-0">
-        <span>🔍</span><span>工单查询</span>
+    <!-- Navigation Tabs (Horizontal Scroll / Compact) -->
+    <div class="flex border-b border-slate-300 gap-1 text-xs font-medium overflow-x-auto no-scrollbar whitespace-nowrap">
+      <button id="tab-check" onclick="switchTab('check')" class="py-2.5 px-3 border-b-2 border-emerald-600 text-emerald-600 font-bold flex items-center gap-1 shrink-0">
+        🔍 <span>工单查询</span>
       </button>
-      <button id="tab-entry" onclick="switchTab('entry')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-        <span>➕</span><span>录入 Green Tag</span>
+      <button id="tab-entry" onclick="switchTab('entry')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1 shrink-0">
+        ➕ <span>录入 Green Tag</span>
       </button>
-      <button id="tab-vault" onclick="switchTab('vault')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-        <span>🔐</span><span>映射表 (加密)</span>
+      <button id="tab-vault" onclick="switchTab('vault')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1 shrink-0">
+        🔐 <span>映射表 (加密)</span>
       </button>
-      <button id="tab-records" onclick="switchTab('records')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-1.5 shrink-0">
-        <span>📋</span><span>所有记录</span>
+      <button id="tab-records" onclick="switchTab('records')" class="py-2.5 px-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-1 shrink-0">
+        📋 <span>所有记录</span>
       </button>
     </div>
 
@@ -51,9 +50,9 @@
     <section id="sec-check" class="space-y-4">
       <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200">
         <label class="block text-sm font-semibold mb-2">输入 Work Order 查询状态：</label>
-        <div class="flex flex-col sm:flex-row gap-2 w-full">
-          <input type="text" id="search-wo" placeholder="例如: WO-102938" class="w-full min-w-0 flex-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
-          <button onclick="checkWOStatus()" class="w-full sm:w-auto shrink-0 bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition text-sm">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="search-wo" placeholder="例如: WO-102938" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-base">
+          <button onclick="checkWOStatus()" class="w-full sm:w-auto bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition shrink-0">
             查询
           </button>
         </div>
@@ -64,30 +63,30 @@
     </section>
 
     <!-- TAB 2: Green Tag Entry -->
-    <section id="sec-entry" class="hidden bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-      <h2 class="text-base font-bold border-b pb-2">新增 Green Tag 记录</h2>
+    <section id="sec-entry" class="hidden bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+      <h2 class="text-lg font-bold border-b pb-2">新增 Green Tag 记录</h2>
       
       <div>
-        <label class="block text-xs font-semibold mb-1">Work Order (工单号) *</label>
-        <input type="text" id="input-wo" placeholder="例如: WO-102938" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+        <label class="block text-sm font-medium mb-1">Work Order (工单号) *</label>
+        <input type="text" id="input-wo" placeholder="例如: WO-102938" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
       </div>
 
       <div>
-        <label class="block text-xs font-semibold mb-1">Part Number (P/N) *</label>
-        <input type="text" id="input-pn" placeholder="例如: PN-99482" oninput="onPNInput()" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+        <label class="block text-sm font-medium mb-1">Part Number (P/N) *</label>
+        <input type="text" id="input-pn" placeholder="例如: PN-99482" oninput="onPNInput()" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
       </div>
 
       <div>
-        <label class="block text-xs font-semibold mb-1">产品描述 (根据 P/N 自动填充)</label>
-        <textarea id="input-desc" rows="2" placeholder="自动填充或手动输入描述..." class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm"></textarea>
+        <label class="block text-sm font-medium mb-1">产品描述 (根据 P/N 自动填充)</label>
+        <textarea id="input-desc" rows="2" placeholder="自动填充或手动输入描述..." class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold mb-1">Green Tag Attached 日期 *</label>
-        <input type="date" id="input-date" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+        <label class="block text-sm font-medium mb-1">Green Tag Attached 日期 *</label>
+        <input type="date" id="input-date" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
       </div>
 
-      <button onclick="saveGreenTag()" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition shadow text-sm">
+      <button onclick="saveGreenTag()" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition shadow">
         确认提交 (Mark Done)
       </button>
     </section>
@@ -95,18 +94,18 @@
     <!-- TAB 3: Encrypted Mapping Vault -->
     <section id="sec-vault" class="hidden space-y-4">
       <!-- Unlock / Set Passphrase Card -->
-      <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-        <h2 class="text-base font-bold border-b pb-2">P/N 与产品描述映射表 (AES 加密)</h2>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <h2 class="text-lg font-bold border-b pb-2">P/N 与产品描述映射表 (AES 加密)</h2>
         <p class="text-xs text-slate-500">
           这里的对照数据会加密存储在本地。部署在 GitHub 时无密匙任何人都无法查看。
         </p>
 
         <div>
-          <label class="block text-xs font-semibold mb-1">主解密密码 (Passphrase)</label>
-          <input type="password" id="vault-passphrase" placeholder="输入访问/加密密码" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+          <label class="block text-sm font-medium mb-1">主解密密码 (Passphrase)</label>
+          <input type="password" id="vault-passphrase" placeholder="输入访问/加密密码" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-2">
+        <div class="flex gap-2">
           <button onclick="unlockVault()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 transition text-sm">
             🔓 解密映射表
           </button>
@@ -117,17 +116,17 @@
       </div>
 
       <!-- Mapping Table Data Editor -->
-      <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
-        <label class="block text-xs font-semibold">对照表内容 (格式: P/N, 产品描述)</label>
-        <p class="text-[11px] text-slate-400">每行一条记录，格式如：<code>PN-1001, 12V 驱动电机组件</code></p>
-        <textarea id="vault-raw-text" rows="8" placeholder="PN-1001, 描述A&#10;PN-1002, 描述B" class="w-full p-2.5 border rounded-lg font-mono text-xs bg-slate-50 focus:bg-white outline-none"></textarea>
+      <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+        <label class="block text-sm font-medium">对照表内容 (格式: P/N, 产品描述)</label>
+        <p class="text-xs text-slate-400">每行一条记录，格式如：<code>PN-1001, 12V 驱动电机组件</code></p>
+        <textarea id="vault-raw-text" rows="8" placeholder="PN-1001, 描述A&#10;PN-1002, 描述B" class="w-full p-2.5 border rounded-lg font-mono text-sm bg-slate-50 focus:bg-white outline-none"></textarea>
       </div>
     </section>
 
     <!-- TAB 4: All Records -->
     <section id="sec-records" class="hidden space-y-4">
       <div class="flex justify-between items-center">
-        <h2 class="text-base font-bold">所有 Green Tag 记录</h2>
+        <h2 class="text-lg font-bold">所有 Green Tag 记录</h2>
         <div class="flex gap-2">
           <button onclick="exportData()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded font-medium">导出 CSV</button>
           <button onclick="clearAllData()" class="text-xs bg-rose-100 text-rose-600 hover:bg-rose-200 px-3 py-1.5 rounded font-medium">清空记录</button>
@@ -169,30 +168,30 @@
       resContainer.classList.remove('hidden');
 
       if (!wo) {
-        resContainer.innerHTML = `<div class="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-xs sm:text-sm border border-yellow-200">请输入有效的 Work Order 号码。</div>`;
+        resContainer.innerHTML = `<div class="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200">请输入有效的 Work Order 号码。</div>`;
         return;
       }
 
       const item = greenTags[wo];
       if (item) {
         resContainer.innerHTML = `
-          <div class="p-4 sm:p-5 bg-emerald-50 border-2 border-emerald-500 rounded-xl space-y-2">
+          <div class="p-5 bg-emerald-50 border-2 border-emerald-500 rounded-xl space-y-2">
             <div class="flex justify-between items-center">
-              <span class="px-2.5 py-1 bg-emerald-600 text-white font-bold text-[11px] rounded-full">DONE (已做 Green Tag)</span>
+              <span class="px-2 py-0.5 bg-emerald-600 text-white font-bold text-[10px] rounded-md tracking-wide">DONE</span>
               <span class="text-xs text-slate-500">日期: ${item.date}</span>
             </div>
-            <h3 class="text-lg sm:text-xl font-extrabold text-emerald-900">${item.wo}</h3>
-            <p class="text-xs sm:text-sm"><strong>Part Number:</strong> <span class="font-mono">${item.pn}</span></p>
-            <p class="text-xs sm:text-sm"><strong>产品描述:</strong> ${item.desc || '（无描述）'}</p>
+            <h3 class="text-xl font-extrabold text-emerald-900">${item.wo}</h3>
+            <p class="text-sm"><strong>Part Number:</strong> <span class="font-mono">${item.pn}</span></p>
+            <p class="text-sm"><strong>产品描述:</strong> ${item.desc || '（无描述）'}</p>
           </div>
         `;
       } else {
         resContainer.innerHTML = `
-          <div class="p-4 sm:p-5 bg-rose-50 border-2 border-rose-400 rounded-xl space-y-2">
+          <div class="p-5 bg-rose-50 border-2 border-rose-400 rounded-xl space-y-2">
             <div class="flex justify-between items-center">
-              <span class="px-2.5 py-1 bg-rose-600 text-white font-bold text-[11px] rounded-full">NOT DONE (未做/未登记)</span>
+              <span class="px-2 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded-md tracking-wide">NOT DONE</span>
             </div>
-            <h3 class="text-base sm:text-lg font-bold text-rose-900">未找到工单号：${wo}</h3>
+            <h3 class="text-lg font-bold text-rose-900">未找到工单号：${wo}</h3>
             <p class="text-xs text-rose-700">说明该工单尚未附上 Green Tag 或未录入系统。</p>
           </div>
         `;
@@ -273,7 +272,7 @@
         parseVaultText(rawText);
 
         document.getElementById('vault-status').innerText = '🔓 映射表已解密';
-        document.getElementById('vault-status').className = 'text-[11px] sm:text-xs bg-emerald-500 text-white px-2 py-1 rounded-full font-medium whitespace-nowrap';
+        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
         alert('映射表已加密保存！');
       } catch (err) {
         alert('加密失败：' + err.message);
@@ -311,7 +310,7 @@
         parseVaultText(text);
 
         document.getElementById('vault-status').innerText = '🔓 映射表已解密';
-        document.getElementById('vault-status').className = 'text-[11px] sm:text-xs bg-emerald-500 text-white px-2 py-1 rounded-full font-medium whitespace-nowrap';
+        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
         alert('映射表解密成功！');
       } catch (err) {
         alert('解密失败：密码错误或数据损坏！');
@@ -337,20 +336,20 @@
       const keys = Object.keys(greenTags);
 
       if (keys.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">暂无 Green Tag 记录</p>`;
+        container.innerHTML = `<p class="text-sm text-slate-400 text-center py-6">暂无 Green Tag 记录</p>`;
         return;
       }
 
       container.innerHTML = keys.map(k => {
         const item = greenTags[k];
         return `
-          <div class="p-3.5 bg-white border rounded-lg shadow-sm flex justify-between items-center">
+          <div class="p-4 bg-white border rounded-lg shadow-sm flex justify-between items-center">
             <div>
-              <div class="font-bold text-sm text-slate-800">${item.wo} <span class="text-xs font-normal text-slate-500">(${item.pn})</span></div>
+              <div class="font-bold text-slate-800">${item.wo} <span class="text-xs font-normal text-slate-500">(${item.pn})</span></div>
               <div class="text-xs text-slate-500 mt-0.5">${item.desc || '无描述'}</div>
-              <div class="text-[11px] text-emerald-600 mt-1">Attached 日期: ${item.date}</div>
+              <div class="text-xs text-emerald-600 mt-1">Attached 日期: ${item.date}</div>
             </div>
-            <button onclick="deleteRecord('${item.wo}')" class="text-xs text-rose-500 hover:text-rose-700 px-2 py-1 shrink-0">删除</button>
+            <button onclick="deleteRecord('${item.wo}')" class="text-xs text-rose-500 hover:text-rose-700 px-2 py-1">删除</button>
           </div>
         `;
       }).join('');
