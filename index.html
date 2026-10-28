@@ -21,7 +21,7 @@
       <h1 class="text-xl font-bold flex items-center gap-2">
         <span>🏷️</span> Green Tag Tracker
       </h1>
-      <span id="vault-status" class="text-xs bg-emerald-800 px-2.5 py-1 rounded-full font-medium">
+      <span id="vault-status" class="text-xs bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
         🔒 映射表已锁定
       </span>
     </div>
@@ -30,7 +30,7 @@
   <!-- Main Container -->
   <main class="max-w-3xl mx-auto p-4 space-y-6">
 
-    <!-- Navigation Tabs (Horizontal Scroll / Compact) -->
+    <!-- Navigation Tabs -->
     <div class="flex border-b border-slate-300 gap-1 text-xs font-medium overflow-x-auto no-scrollbar whitespace-nowrap">
       <button id="tab-check" onclick="switchTab('check')" class="py-2.5 px-3 border-b-2 border-emerald-600 text-emerald-600 font-bold flex items-center gap-1 shrink-0">
         🔍 <span>工单查询</span>
@@ -97,7 +97,7 @@
       <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
         <h2 class="text-lg font-bold border-b pb-2">P/N 与产品描述映射表 (AES 加密)</h2>
         <p class="text-xs text-slate-500">
-          这里的对照数据会加密存储在本地。部署在 GitHub 时无密匙任何人都无法查看。
+          这里的对照数据会加密存储在本地。部署在 GitHub 时无密钥任何人都无法查看。
         </p>
 
         <div>
@@ -105,14 +105,17 @@
           <input type="password" id="vault-passphrase" placeholder="输入访问/加密密码" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
 
-        <div class="flex gap-2">
-          <button onclick="unlockVault()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 transition text-sm">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="unlockVault()" class="bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 transition text-xs sm:text-sm">
             🔓 解密映射表
           </button>
-          <button onclick="saveAndEncryptVault()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition text-sm">
+          <button onclick="saveAndEncryptVault()" class="bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition text-xs sm:text-sm">
             🔒 保存并加密
           </button>
         </div>
+        <button onclick="lockVault()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-300 transition text-xs">
+          🔒 清空内存明文 (重新锁定)
+        </button>
       </div>
 
       <!-- Mapping Table Data Editor -->
@@ -140,7 +143,6 @@
   <script>
     // --- State & App Storage ---
     let greenTags = JSON.parse(localStorage.getItem('gt_records') || '{}');
-    let encryptedVault = localStorage.getItem('gt_vault_enc') || null;
     let decryptedPnMap = {}; 
 
     document.getElementById('input-date').valueAsDate = new Date();
@@ -269,11 +271,10 @@
         };
 
         localStorage.setItem('gt_vault_enc', JSON.stringify(payload));
-        parseVaultText(rawText);
-
-        document.getElementById('vault-status').innerText = '🔓 映射表已解密';
-        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
-        alert('映射表已加密保存！');
+        
+        // 加密保存后，立即清空内存明文并锁定状态
+        lockVault();
+        alert('映射表已加密保存并封存锁定！');
       } catch (err) {
         alert('加密失败：' + err.message);
       }
@@ -309,12 +310,23 @@
         document.getElementById('vault-raw-text').value = text;
         parseVaultText(text);
 
-        document.getElementById('vault-status').innerText = '🔓 映射表已解密';
-        document.getElementById('vault-status').className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium';
+        // 设置为解密状态
+        const statusEl = document.getElementById('vault-status');
+        statusEl.innerText = '🔓 映射表已解密';
+        statusEl.className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium flex items-center gap-1';
         alert('映射表解密成功！');
       } catch (err) {
         alert('解密失败：密码错误或数据损坏！');
       }
+    }
+
+    function lockVault() {
+      decryptedPnMap = {};
+      document.getElementById('vault-raw-text').value = '';
+      document.getElementById('vault-passphrase').value = '';
+      const statusEl = document.getElementById('vault-status');
+      statusEl.innerText = '🔒 映射表已锁定';
+      statusEl.className = 'text-xs bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1';
     }
 
     function parseVaultText(text) {
