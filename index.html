@@ -21,7 +21,7 @@
       <h1 class="text-xl font-bold flex items-center gap-2">
         <span>🏷️</span> Green Tag Tracker
       </h1>
-      <span id="vault-status" class="text-xs bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+      <span id="vault-status" class="text-[11px] whitespace-nowrap bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shrink-0">
         🔒 映射表已锁定
       </span>
     </div>
@@ -313,7 +313,7 @@
         // 设置为解密状态
         const statusEl = document.getElementById('vault-status');
         statusEl.innerText = '🔓 映射表已解密';
-        statusEl.className = 'text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium flex items-center gap-1';
+        statusEl.className = 'text-[11px] whitespace-nowrap bg-emerald-500 text-white px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shrink-0';
         alert('映射表解密成功！');
       } catch (err) {
         alert('解密失败：密码错误或数据损坏！');
@@ -326,7 +326,7 @@
       document.getElementById('vault-passphrase').value = '';
       const statusEl = document.getElementById('vault-status');
       statusEl.innerText = '🔒 映射表已锁定';
-      statusEl.className = 'text-xs bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1';
+      statusEl.className = 'text-[11px] whitespace-nowrap bg-emerald-950/60 text-emerald-200 border border-emerald-500/30 px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shrink-0';
     }
 
     function parseVaultText(text) {
